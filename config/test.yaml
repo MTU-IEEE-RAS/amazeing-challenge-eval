@@ -1,0 +1,4 @@
+seed: 0
+maze_width: 5
+maze_height: 5
+num_trials: 1
