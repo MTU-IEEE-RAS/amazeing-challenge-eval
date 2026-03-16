@@ -72,7 +72,11 @@ if __name__ == "__main__":
     base = pathlib.Path(".")
     blacklist = [pathlib.Path("eval.py")]
     solvers = load_child_solvers_from_directory(base, blacklist)
-    fig, axs = plt.subplots(len(solvers), 2) # one column for path length, one for success rate
+    fig, axs = plt.subplots(1, 2) # one column for path length, one for success rate
+    
+    # Get axes
+    cost_ax : plt.Axes = axs[0]
+    success_ax : plt.Axes = axs[1]
     
     # Setup maze and start/goal for testing
     generator = wilsons_generator.WilsonsGenerator()
@@ -82,9 +86,25 @@ if __name__ == "__main__":
     # Loop through each solver
     for path, solver in solvers.items():
         print(f"Testing {solver} from {path}")
-        solver_instance : Solver = solver()
-        solver_instance.solve(maze, start_and_goal[0], start_and_goal[1]) # warm up the solver (if it has any initialization overhead)
-        # tester = Tester(generator, solver, verbose=True)
-        # results = []
-        # for i in range(config.num_trials):
-        #     results.append(tester.test((maze, start_and_goal)))
+        tester = Tester(None, solver(), verbose=True)
+        results = tester.test((maze, start_and_goal))
+        
+        cost_ax.plot([result['time_elapsed'] for result in results if result['is_valid_solution']], 
+                     [result['path_length'] for result in results if result['is_valid_solution']], 
+                     label=solver.__name__)
+        success_ax.plot([result['time_elapsed'] for result in results], 
+                        [1 if result['is_valid_solution'] else 0 for result in results], 
+                        label=solver.__name__)
+    
+    # Set titles and labels
+    cost_ax.set_title("Path Length vs Time Elapsed")
+    cost_ax.set_xlabel("Time Elapsed (s)")
+    cost_ax.set_ylabel("Path Length")
+    success_ax.set_title("Success Rate vs Time Elapsed")
+    success_ax.set_xlabel("Time Elapsed (s)")
+    success_ax.set_ylabel("Success Rate")
+    
+    # Setup legend
+    plt.subplots_adjust(bottom=0.2, wspace=0.4)
+    plt.legend(loc='upper center', bbox_to_anchor=(-0.2, -0.15), fancybox=True, shadow=True, ncols=3)
+    plt.show()
