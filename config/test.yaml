@@ -1,4 +1,5 @@
 seed: 0
-maze_width: 5
-maze_height: 5
+maze_width: 60
+maze_height: 60
 num_trials: 1
+additional_edges: 100
